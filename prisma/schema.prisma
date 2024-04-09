@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// criar uma migration: yarn prisma migrate dev
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(150)
+  email      String    @db.VarChar(120)
+  password   String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  deleted_at DateTime?
+
+  @@map("users")
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+
+  name             String    @db.VarChar(150)
+  price            Float
+  description      String    @db.VarChar(250)
+  banner           String?
+  maximum_quantity Int
+  minimum_quantity Int
+  created_at       DateTime? @default(now())
+  updated_at       DateTime? @default(now())
+  deleted_at       DateTime?
+
+  category    Category @relation(fields: [category_id], references: [id])
+  category_id Int
+  Stock       Stock[]
+
+  @@map("products")
+}
+
+model Stock {
+  id Int @id @default(autoincrement())
+
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  deleted_at DateTime?
+
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id Int
+
+  @@map("stock")
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+
+  name       String    @db.VarChar(100)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  deleted_at DateTime?
+  Product    Product[]
+
+  @@map("categories")
+}
+
+model Client {
+  id Int @id @default(autoincrement())
+
+  businessName String    @db.VarChar(150)
+  cpnj         String?   @db.Char(14)
+  created_at   DateTime? @default(now())
+  updated_at   DateTime? @default(now())
+  deleted_at   DateTime?
+
+  @@map("client")
+}
+
+model Sale {
+  id         Int      @id @default(autoincrement())
+  client     Client   @relation(fields: [clientId], references: [id])
+  clientId   Int
+  vendedor   Vendedor @relation(fields: [vendedorId], references: [id])
+  vendedorId Int
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  produtoId  Int
+  quantidade Int
+  valorTotal Float
+  dataVenda  DateTime @default(now())
+}
