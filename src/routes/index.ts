@@ -1,8 +1,9 @@
 import { Router } from 'express'
 
 import { categoryRoutes } from '@/modules/category/routes'
-import { dataProcessingRoutes } from '@/modules/dataProcessing/routes'
+import { clientRoutes } from '@/modules/client/routes'
 import { itemRoutes } from '@/modules/item/routes'
+import { movementTypeRoutes } from '@/modules/movement-type/routes'
 import { orderRoutes } from '@/modules/order/routes'
 import { productRoutes } from '@/modules/product/routes'
 import { userRoutes } from '@/modules/user/routes'
@@ -16,4 +17,5 @@ routes.use('/category', categoryRoutes)
 routes.use('/order', orderRoutes)
 routes.use('/item', itemRoutes)
 routes.use('/session', sessionRoutes)
-routes.use('/dataProcessing', dataProcessingRoutes)
+routes.use('/movementType', movementTypeRoutes)
+routes.use('/client', clientRoutes)

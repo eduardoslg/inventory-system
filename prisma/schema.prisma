@@ -12,12 +12,13 @@ datasource db {
 
 // criar uma migration: yarn prisma migrate dev
 model User {
-  id         Int       @id @default(autoincrement())
-  name       String    @db.VarChar(150)
-  email      String    @db.VarChar(120)
-  password   String
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(150)
+  email    String @unique @db.VarChar(120)
+  password String
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
   deleted_at DateTime?
 
   @@map("users")
@@ -26,69 +27,83 @@ model User {
 model Product {
   id Int @id @default(autoincrement())
 
-  name             String    @db.VarChar(150)
+  name             String  @db.VarChar(150)
   price            Float
-  description      String    @db.VarChar(250)
-  banner           String?
+  image            String?
+  total            Int
   maximum_quantity Int
   minimum_quantity Int
-  created_at       DateTime? @default(now())
-  updated_at       DateTime? @default(now())
-  deleted_at       DateTime?
 
-  category    Category @relation(fields: [category_id], references: [id])
+  category    Category   @relation(fields: [category_id], references: [id])
   category_id Int
-  Stock       Stock[]
+  Client      Client     @relation(fields: [client_id], references: [id])
+  client_id   Int
+  Movement    Movement[]
 
-  @@map("products")
-}
-
-model Stock {
-  id Int @id @default(autoincrement())
-
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  product    Product @relation(fields: [product_id], references: [id])
-  product_id Int
-
-  @@map("stock")
+  @@map("products")
 }
 
 model Category {
   id Int @id @default(autoincrement())
 
-  name       String    @db.VarChar(100)
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
+  name String @db.VarChar(100)
+
+  client_id Int
+  Product   Product[]
+  Client    Client    @relation(fields: [client_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
   deleted_at DateTime?
-  Product    Product[]
 
   @@map("categories")
+}
+
+model Movement {
+  id Int @id @default(autoincrement())
+
+  amount Int
+
+  MovementType     MovementType @relation(fields: [movement_type_id], references: [id])
+  movement_type_id Int
+  Product          Product      @relation(fields: [product_id], references: [id])
+  product_id       Int
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  @@map("movement")
+}
+
+model MovementType {
+  id       Int        @id @default(autoincrement())
+  name     String     @db.VarChar(50)
+  Movement Movement[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  @@map("movement_type")
 }
 
 model Client {
   id Int @id @default(autoincrement())
 
-  businessName String    @db.VarChar(150)
-  cpnj         String?   @db.Char(14)
-  created_at   DateTime? @default(now())
-  updated_at   DateTime? @default(now())
-  deleted_at   DateTime?
+  businessName String  @db.VarChar(150)
+  cnpj         String? @unique @db.Char(14)
+
+  categories Category[]
+  products   Product[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
 
   @@map("client")
-}
-
-model Sale {
-  id         Int      @id @default(autoincrement())
-  client     Client   @relation(fields: [clientId], references: [id])
-  clientId   Int
-  vendedor   Vendedor @relation(fields: [vendedorId], references: [id])
-  vendedorId Int
-  produto    Produto  @relation(fields: [produtoId], references: [id])
-  produtoId  Int
-  quantidade Int
-  valorTotal Float
-  dataVenda  DateTime @default(now())
 }
