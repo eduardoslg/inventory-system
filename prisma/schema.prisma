@@ -21,7 +21,7 @@ model User {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  @@map("users")
+  @@map("isys_user")
 }
 
 model Product {
@@ -44,7 +44,7 @@ model Product {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  @@map("products")
+  @@map("isys_product")
 }
 
 model Category {
@@ -60,7 +60,7 @@ model Category {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  @@map("categories")
+  @@map("isys_category")
 }
 
 model Movement {
@@ -77,7 +77,7 @@ model Movement {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  @@map("movement")
+  @@map("isys_movement")
 }
 
 model MovementType {
@@ -89,7 +89,7 @@ model MovementType {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  @@map("movement_type")
+  @@map("isys_movement_type")
 }
 
 model Client {
@@ -105,5 +105,107 @@ model Client {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  @@map("client")
+  @@map("isys_client")
+}
+
+model Budget {
+  id Int @id @default(autoincrement())
+
+  status_id    Int
+  requester_id Int
+  request_date DateTime @default(now())
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  Requester    Requester    @relation(fields: [requester_id], references: [id])
+  BudgetItem   BudgetItem[]
+  BudgetStatus BudgetStatus @relation(fields: [status_id], references: [id])
+
+  @@map("isys_budget")
+}
+
+model BudgetStatus {
+  id Int @id @default(autoincrement())
+
+  name       String    @db.VarChar(250)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  Budget Budget[]
+
+  @@map("isys_budget_status")
+}
+
+model Requester {
+  id    Int     @id @default(autoincrement())
+  name  String  @db.VarChar(250)
+  email String? @unique @db.VarChar(120)
+  cpf   String? @db.Char(11)
+
+  address_id Int?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  Budget           Budget[]
+  RequesterAddress RequesterAddress[]
+
+  @@map("isys_requester")
+}
+
+model BudgetItem {
+  id Int @id @default(autoincrement())
+
+  budget_id    Int
+  item_type_id Int
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  Budget         Budget         @relation(fields: [budget_id], references: [id])
+  BudgetItemType BudgetItemType @relation(fields: [item_type_id], references: [id], onDelete: Cascade)
+
+  @@map("isys_budget_item")
+}
+
+model BudgetItemType {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+
+  value Decimal @db.Decimal(10, 2)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  BudgetItem BudgetItem[]
+
+  @@map("isys_budget_item_type")
+}
+
+model RequesterAddress {
+  id Int @id @default(autoincrement())
+
+  requester_id          Int
+  uf                    String  @db.Char(2)
+  zipCode               String  @db.Char(8)
+  number                String? @db.VarChar(15)
+  neighborhood          String  @db.VarChar(30)
+  address               String  @db.VarChar(50)
+  city                  String  @db.VarChar(30)
+  additionalAddressData String? @db.VarChar(30)
+  description           String? @db.VarChar(150)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  Requester Requester @relation(fields: [requester_id], references: [id], onDelete: Cascade)
+
+  @@map("isys_requester_address")
 }
