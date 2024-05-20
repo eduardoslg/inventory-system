@@ -6,42 +6,39 @@ import { getOneRequestSchema } from '@/shared/controllers/get-one-request-schema
 import { makeCreateItem } from '../use-cases/factories/make-create-item'
 import { makeDeleteItem } from '../use-cases/factories/make-delete-item'
 import { makeListItems } from '../use-cases/factories/make-list-items'
+import {
+  createItemSchema,
+  listItemSchema,
+} from '../validations/item-validation'
 
 export class ItemController {
   static async create(request: Request, response: Response) {
-    const createItemBodySchema = z.object({
-      orderId: z.number({
-        required_error: 'É necessário informar a mesa.',
-      }),
-      productId: z.number({
-        required_error: 'É necessário informar o produto.',
-      }),
-      amount: z.number({
-        required_error: 'É necessário informar a quantidade.',
-      }),
-    })
-
-    const { orderId, productId, amount } = createItemBodySchema.parse(
-      request.body,
-    )
+    const { name, suggestedValue } = createItemSchema.parse(request.body)
 
     const createItem = makeCreateItem()
 
     const output = await createItem.execute({
-      orderId,
-      productId,
-      amount,
+      name,
+      suggestedValue,
     })
 
     return response.json(output)
   }
 
   static async list(request: Request, response: Response) {
-    const { id } = getOneRequestSchema.parse(request.params)
+    const { page, limit } = listItemSchema.parse(request.params)
 
     const listItems = makeListItems()
 
-    const output = await listItems.execute(id)
+    const output = await listItems.execute({ page, limit })
+
+    return response.json(output)
+  }
+
+  static async listForDropdown(request: Request, response: Response) {
+    const listItems = makeListItems()
+
+    const output = await listItems.execute()
 
     return response.json(output)
   }

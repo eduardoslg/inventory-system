@@ -34,15 +34,19 @@ model Product {
   maximum_quantity Int
   minimum_quantity Int
 
-  category    Category   @relation(fields: [category_id], references: [id])
   category_id Int
-  Client      Client     @relation(fields: [client_id], references: [id])
   client_id   Int
-  Movement    Movement[]
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
+
+  Client     Client?   @relation(fields: [clientId], references: [id])
+  clientId   Int?
+  Category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+
+  Movement Movement[]
 
   @@map("isys_product")
 }
@@ -53,12 +57,14 @@ model Category {
   name String @db.VarChar(100)
 
   client_id Int
-  Product   Product[]
-  Client    Client    @relation(fields: [client_id], references: [id])
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
+
+  Client Client @relation(fields: [client_id], references: [id])
+
+  Product Product[]
 
   @@map("isys_category")
 }
@@ -68,26 +74,28 @@ model Movement {
 
   amount Int
 
-  MovementType     MovementType @relation(fields: [movement_type_id], references: [id])
   movement_type_id Int
-  Product          Product      @relation(fields: [product_id], references: [id])
   product_id       Int
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
+  MovementType MovementType @relation(fields: [movement_type_id], references: [id])
+  Product      Product      @relation(fields: [product_id], references: [id])
+
   @@map("isys_movement")
 }
 
 model MovementType {
-  id       Int        @id @default(autoincrement())
-  name     String     @db.VarChar(50)
-  Movement Movement[]
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(50)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
+
+  Movement Movement[]
 
   @@map("isys_movement_type")
 }
@@ -98,12 +106,12 @@ model Client {
   businessName String  @db.VarChar(150)
   cnpj         String? @unique @db.Char(14)
 
-  categories Category[]
-  products   Product[]
-
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
+
+  categories Category[]
+  products   Product[]
 
   @@map("isys_client")
 }
@@ -120,8 +128,8 @@ model Budget {
   deleted_at DateTime?
 
   Requester    Requester    @relation(fields: [requester_id], references: [id])
-  BudgetItem   BudgetItem[]
   BudgetStatus BudgetStatus @relation(fields: [status_id], references: [id])
+  BudgetItem   BudgetItem[]
 
   @@map("isys_budget")
 }
@@ -151,8 +159,8 @@ model Requester {
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
+  RequesterAddress RequesterAddress? @relation(fields: [address_id], references: [id])
   Budget           Budget[]
-  RequesterAddress RequesterAddress[]
 
   @@map("isys_requester")
 }
@@ -160,24 +168,25 @@ model Requester {
 model BudgetItem {
   id Int @id @default(autoincrement())
 
-  budget_id    Int
-  item_type_id Int
+  budget_id Int
+  item_id   Int
+  value     Decimal @db.Decimal(10, 2)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
   deleted_at DateTime?
 
-  Budget         Budget         @relation(fields: [budget_id], references: [id])
-  BudgetItemType BudgetItemType @relation(fields: [item_type_id], references: [id], onDelete: Cascade)
+  Budget Budget @relation(fields: [budget_id], references: [id])
+  Item   Item   @relation(fields: [item_id], references: [id], onDelete: Restrict)
 
   @@map("isys_budget_item")
 }
 
-model BudgetItemType {
+model Item {
   id   Int    @id @default(autoincrement())
   name String @db.VarChar(100)
 
-  value Decimal @db.Decimal(10, 2)
+  suggested_value Decimal @db.Decimal(10, 2)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
@@ -185,13 +194,12 @@ model BudgetItemType {
 
   BudgetItem BudgetItem[]
 
-  @@map("isys_budget_item_type")
+  @@map("isys_item")
 }
 
 model RequesterAddress {
   id Int @id @default(autoincrement())
 
-  requester_id          Int
   uf                    String  @db.Char(2)
   zipCode               String  @db.Char(8)
   number                String? @db.VarChar(15)
@@ -201,11 +209,10 @@ model RequesterAddress {
   additionalAddressData String? @db.VarChar(30)
   description           String? @db.VarChar(150)
 
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now())
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now())
   deleted_at DateTime?
-
-  Requester Requester @relation(fields: [requester_id], references: [id], onDelete: Cascade)
+  Requester  Requester[]
 
   @@map("isys_requester_address")
 }

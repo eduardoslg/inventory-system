@@ -9,7 +9,8 @@ export const itemRoutes = Router()
 itemRoutes.use(ensureAuthenticated)
 
 itemRoutes.post('/', ItemController.create)
-itemRoutes.get('/list/:id', ItemController.list)
+itemRoutes.get('/list', ItemController.list)
+itemRoutes.get('/list/dropdown', ItemController.listForDropdown)
 itemRoutes.delete('/:id', ItemController.delete)
 
 // productRoutes.get('/:id', UserController.get)

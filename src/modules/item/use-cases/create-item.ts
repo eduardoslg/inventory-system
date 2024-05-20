@@ -1,39 +1,16 @@
-import AppError from '@/errors/AppError'
-import { OrdersRepository } from '@/modules/order/repositories/orders-repository'
-import { ProductsRepository } from '@/modules/product/repositories/products-repository'
-
-import { ItemDTO, ItemsRepository } from '../repositories/items-repository'
+import { ItemsRepository } from '../repositories/items-repository'
+import { CreateItemInput } from '../validations/item-validation'
 
 export class CreateItem {
   /**
    *
    */
-  constructor(
-    private readonly itemsRepository: ItemsRepository,
-    private readonly ordersRepository: OrdersRepository,
-    private readonly productsRepository: ProductsRepository,
-  ) {}
+  constructor(private readonly itemsRepository: ItemsRepository) {}
 
-  public async execute({ orderId, productId, amount }: ItemDTO) {
-    const order = await this.ordersRepository.findById(orderId)
-    const product = await this.productsRepository.findById(productId)
-
-    if (!order) {
-      throw new AppError(
-        'Nenhuma mesa encontrada com o identificador informado.',
-      )
-    }
-
-    if (!product) {
-      throw new AppError(
-        'Nenhum produto encontrado com o identificador informado.',
-      )
-    }
-
+  public async execute({ name, suggestedValue }: CreateItemInput) {
     const id = await this.itemsRepository.create({
-      orderId,
-      productId,
-      amount,
+      name,
+      suggestedValue,
     })
 
     const output = await this.itemsRepository.findById(id)

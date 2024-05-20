@@ -1,0 +1,1 @@
+INSERT INTO isys_budget_status (name) VALUES ('Pendente'), ('Reprovado'), ('Aprovado')

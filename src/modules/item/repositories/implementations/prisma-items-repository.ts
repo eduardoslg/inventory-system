@@ -1,15 +1,22 @@
 import { prisma } from '@/prisma'
 import { Item } from '@prisma/client'
 
-import { ItemDTO, ItemsRepository } from '../items-repository'
+import {
+  CreateItemInput,
+  ListItemSchema,
+} from '../../validations/item-validation'
+import {
+  ItemsRepository,
+  ListItemDTO,
+  ListItemForDropdownDTO,
+} from '../items-repository'
 
 export class PrismaItemsRepository implements ItemsRepository {
-  async create({ orderId, productId, amount }: ItemDTO): Promise<number> {
+  async create({ name, suggestedValue }: CreateItemInput): Promise<number> {
     const output = await prisma.item.create({
       data: {
-        orderId,
-        product_id: productId,
-        amount,
+        name,
+        suggested_value: suggestedValue,
       },
       select: {
         id: true,
@@ -30,42 +37,44 @@ export class PrismaItemsRepository implements ItemsRepository {
     })
   }
 
-  async list(orderId: number): Promise<Item[]> {
+  async list({ page, limit }: ListItemSchema): Promise<ListItemDTO> {
+    const offset = (page - 1) * limit
+
+    const count = await prisma.$queryRaw<[count: number]>`
+      select count(*)
+        from isys_item I`
+
     const output = await prisma.$queryRaw<Item[]>`
-      SELECT
-        i.id,
-        i.amount,
-        i."orderId",
-        i.product_id,
-        p."name",
-        p.description,
-        p.price,
-        p.banner 
-      FROM 
-        items i
-      JOIN 
-        products p on p.id = i.product_id
-      WHERE i."orderId" = ${orderId}`
+      select I.id,
+	           I."name" as name,
+	           I.suggested_value as "suggestedValue"
+        from isys_item I
+       limit ${limit}
+      offset ${offset}`
+
+    return {
+      count: count[0],
+      data: output,
+    }
+  }
+
+  async listForDropdown(): Promise<ListItemForDropdownDTO[]> {
+    const output = await prisma.$queryRaw<ListItemForDropdownDTO[]>`
+      select I.id as value,
+	           I."name" as label,
+	           I.suggested_value as "suggestedValue"
+        from isys_item I`
 
     return output
   }
 
   async findById(id: number): Promise<Item> {
     const output = await prisma.$queryRaw<Item[]>`
-      SELECT
-        i.id,
-        i.amount,
-        i."orderId",
-        i.product_id,
-        p."name",
-        p.description,
-        p.price,
-        p.banner 
-      FROM 
-        items i
-      JOIN 
-        products p on p.id = i.product_id
-      WHERE i.id = ${id}`
+      select I.id,
+	           I."name" as name,
+	           I.suggested_value as "suggestedValue"
+        from isys_item I
+       where I.id = ${id}`
 
     return output[0]
   }
