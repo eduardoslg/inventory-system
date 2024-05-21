@@ -1,15 +1,13 @@
-import { Item } from '@prisma/client'
-
-import { ItemsRepository } from '../repositories/items-repository'
+import { ItemRepository, ListItemDTO } from '../repositories/item-repository'
 import { ListItemSchema } from '../validations/item-validation'
 
 export class ListItems {
   /**
    *
    */
-  constructor(private readonly itemsRepository: ItemsRepository) {}
+  constructor(private readonly itemsRepository: ItemRepository) {}
 
-  public async execute({ page, limit }: ListItemSchema): Promise<Item[]> {
+  public async execute({ page, limit }: ListItemSchema): Promise<ListItemDTO> {
     const output = await this.itemsRepository.list({ page, limit })
 
     return output

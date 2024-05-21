@@ -4,16 +4,34 @@ import { Item } from '@prisma/client'
 import {
   CreateItemInput,
   ListItemSchema,
+  UpdateItemInput,
 } from '../../validations/item-validation'
 import {
-  ItemsRepository,
+  ItemRepository,
   ListItemDTO,
   ListItemForDropdownDTO,
-} from '../items-repository'
+} from '../item-repository'
 
-export class PrismaItemsRepository implements ItemsRepository {
+export class PrismaItemRepository implements ItemRepository {
   async create({ name, suggestedValue }: CreateItemInput): Promise<number> {
     const output = await prisma.item.create({
+      data: {
+        name,
+        suggested_value: suggestedValue,
+      },
+      select: {
+        id: true,
+      },
+    })
+
+    return output.id
+  }
+
+  async update({ id, name, suggestedValue }: UpdateItemInput): Promise<number> {
+    const output = await prisma.item.update({
+      where: {
+        id,
+      },
       data: {
         name,
         suggested_value: suggestedValue,
@@ -40,20 +58,23 @@ export class PrismaItemsRepository implements ItemsRepository {
   async list({ page, limit }: ListItemSchema): Promise<ListItemDTO> {
     const offset = (page - 1) * limit
 
-    const count = await prisma.$queryRaw<[count: number]>`
-      select count(*)
-        from isys_item I`
+    const count = await prisma.item.count({
+      where: {
+        deleted_at: null,
+      },
+    })
 
     const output = await prisma.$queryRaw<Item[]>`
       select I.id,
 	           I."name" as name,
 	           I.suggested_value as "suggestedValue"
         from isys_item I
+       where I.deleted_at is null
        limit ${limit}
       offset ${offset}`
 
     return {
-      count: count[0],
+      count,
       data: output,
     }
   }
@@ -63,7 +84,9 @@ export class PrismaItemsRepository implements ItemsRepository {
       select I.id as value,
 	           I."name" as label,
 	           I.suggested_value as "suggestedValue"
-        from isys_item I`
+        from isys_item I
+       where I.deleted_at is null
+       order by I.name asc`
 
     return output
   }
@@ -74,7 +97,8 @@ export class PrismaItemsRepository implements ItemsRepository {
 	           I."name" as name,
 	           I.suggested_value as "suggestedValue"
         from isys_item I
-       where I.id = ${id}`
+       where I.id = ${id}
+         and I.deleted_at is null`
 
     return output[0]
   }

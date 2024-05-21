@@ -10,6 +10,7 @@ clientRoutes.use(ensureAuthenticated)
 
 clientRoutes.post('/', ClientController.create)
 clientRoutes.put('/:id', ClientController.update)
+clientRoutes.get('/list', ClientController.list)
 clientRoutes.get('/list/dropdown', ClientController.listForDropdown)
 clientRoutes.delete('/:id', ClientController.delete)
 

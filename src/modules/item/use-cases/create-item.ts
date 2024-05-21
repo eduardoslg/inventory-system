@@ -1,11 +1,11 @@
-import { ItemsRepository } from '../repositories/items-repository'
+import { ItemRepository } from '../repositories/item-repository'
 import { CreateItemInput } from '../validations/item-validation'
 
 export class CreateItem {
   /**
    *
    */
-  constructor(private readonly itemsRepository: ItemsRepository) {}
+  constructor(private readonly itemsRepository: ItemRepository) {}
 
   public async execute({ name, suggestedValue }: CreateItemInput) {
     const id = await this.itemsRepository.create({

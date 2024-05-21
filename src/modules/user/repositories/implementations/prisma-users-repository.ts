@@ -39,7 +39,7 @@ export class PrismaUsersRepository implements UsersRepository {
          updated_at,
          deleted_at
        FROM 
-         users
+         isys_user
        WHERE 
          (id = ${id} and deleted_at is null)`
 
@@ -56,7 +56,7 @@ export class PrismaUsersRepository implements UsersRepository {
          updated_at,
          deleted_at
        FROM 
-         users
+         isys_user
        WHERE 
          (email = ${email} and deleted_at is null)`
 

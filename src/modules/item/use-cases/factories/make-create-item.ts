@@ -1,8 +1,8 @@
-import { PrismaItemsRepository } from '../../repositories/implementations/prisma-items-repository'
+import { PrismaItemRepository } from '../../repositories/implementations/prisma-item-repository'
 import { CreateItem } from '../create-item'
 
 export function makeCreateItem(): CreateItem {
-  const itemsRepository = new PrismaItemsRepository()
+  const itemsRepository = new PrismaItemRepository()
 
   return new CreateItem(itemsRepository)
 }

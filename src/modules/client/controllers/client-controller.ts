@@ -1,23 +1,21 @@
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
+import { listItemSchema } from '@/modules/item/validations/item-validation'
 import { getOneRequestSchema } from '@/shared/controllers/get-one-request-schema'
 
 import { makeListClientForDropdown } from '../use-cases/factories/make-client-for-dropdown'
 import { makeCreateClient } from '../use-cases/factories/make-create-client'
 import { makeDeleteClient } from '../use-cases/factories/make-delete-client'
+import { makeListClient } from '../use-cases/factories/make-list-client'
 import { makeUpdateClient } from '../use-cases/factories/make-update-client'
+import {
+  createClientSchema,
+  updateClientSchema,
+} from '../validations/client-validation'
 
 export class ClientController {
   static async create(request: Request, response: Response) {
-    const createItemBodySchema = z.object({
-      businessName: z.string({
-        required_error: 'É necessário informar o nome do cliente.',
-      }),
-      cnpj: z.string().optional(),
-    })
-
-    const { businessName, cnpj } = createItemBodySchema.parse(request.body)
+    const { businessName, cnpj } = createClientSchema.parse(request.body)
 
     const createClient = makeCreateClient()
 
@@ -30,16 +28,9 @@ export class ClientController {
   }
 
   static async update(request: Request, response: Response) {
-    const createItemBodySchema = z.object({
-      businessName: z.string({
-        required_error: 'É necessário informar o nome.',
-      }),
-      cnpj: z.string().optional(),
-    })
-
     const { id } = getOneRequestSchema.parse(request.params)
 
-    const { businessName, cnpj } = createItemBodySchema.parse(request.body)
+    const { businessName, cnpj } = updateClientSchema.parse(request.body)
 
     const updateClient = makeUpdateClient()
 
@@ -48,6 +39,16 @@ export class ClientController {
       businessName,
       cnpj,
     })
+
+    return response.json(output)
+  }
+
+  static async list(request: Request, response: Response) {
+    const { page, limit } = listItemSchema.parse(request.params)
+
+    const listClient = makeListClient()
+
+    const output = await listClient.execute({ page, limit })
 
     return response.json(output)
   }

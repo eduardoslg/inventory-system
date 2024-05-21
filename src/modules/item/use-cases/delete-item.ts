@@ -1,12 +1,12 @@
 import AppError from '@/errors/AppError'
 
-import { ItemsRepository } from '../repositories/items-repository'
+import { ItemRepository } from '../repositories/item-repository'
 
 export class DeleteItem {
   /**
    *
    */
-  constructor(private readonly itemsRepository: ItemsRepository) {}
+  constructor(private readonly itemsRepository: ItemRepository) {}
 
   public async execute(id: number): Promise<boolean> {
     const findItem = await this.itemsRepository.findById(id)

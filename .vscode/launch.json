@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "attach",
-      "name": "backend-debug",
+      "name": "inventory-debug",
       "restart": true,
       "skipFiles": [
         "<node_internals>/**"

@@ -1,8 +1,8 @@
-import { PrismaItemsRepository } from '../../repositories/implementations/prisma-items-repository'
+import { PrismaItemRepository } from '../../repositories/implementations/prisma-item-repository'
 import { DeleteItem } from '../delete-item'
 
 export function makeDeleteItem(): DeleteItem {
-  const itemsRepository = new PrismaItemsRepository()
+  const itemsRepository = new PrismaItemRepository()
 
   return new DeleteItem(itemsRepository)
 }

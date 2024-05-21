@@ -1,6 +1,10 @@
 import { Item } from '@prisma/client'
 
-import { CreateItemInput, ListItemSchema } from '../validations/item-validation'
+import {
+  CreateItemInput,
+  ListItemSchema,
+  UpdateItemInput,
+} from '../validations/item-validation'
 
 export type ItemDTO = {
   orderId: number
@@ -19,9 +23,10 @@ export type ListItemForDropdownDTO = {
   suggestedValue: number
 }
 
-export interface ItemsRepository {
+export interface ItemRepository {
   findById(id: number): Promise<Item>
   create(input: CreateItemInput): Promise<number>
+  update(input: UpdateItemInput): Promise<number>
   list({ page, limit }: ListItemSchema): Promise<ListItemDTO>
   listForDropdown(): Promise<ListItemForDropdownDTO[]>
   delete(id: number): Promise<void>

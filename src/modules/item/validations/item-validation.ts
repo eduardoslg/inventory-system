@@ -9,6 +9,13 @@ export const createItemSchema = z.object({
   }),
 })
 
+export const updateItemSchema = createItemSchema.extend({
+  id: z
+    .string()
+    .optional()
+    .transform((id) => Number(id)),
+})
+
 export const listItemSchema = z.object({
   page: z
     .string()
@@ -21,5 +28,6 @@ export const listItemSchema = z.object({
 })
 
 export type CreateItemInput = z.infer<typeof createItemSchema>
+export type UpdateItemInput = z.infer<typeof updateItemSchema>
 
 export type ListItemSchema = z.infer<typeof listItemSchema>

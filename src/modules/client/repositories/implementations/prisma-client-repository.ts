@@ -1,10 +1,15 @@
 import { prisma } from '@/prisma'
 import { Client } from '@prisma/client'
 
-import { ClientDTO, ClientRepository, ClientWithId } from '../client-repository'
+import {
+  CreateClientInput,
+  ListClientSchema,
+  UpdateClientInput,
+} from '../../validations/client-validation'
+import { ClientRepository, ListClientDTO } from '../client-repository'
 
 export class PrismaClientRepository implements ClientRepository {
-  async create({ businessName, cnpj }: ClientDTO): Promise<ClientWithId> {
+  async create({ businessName, cnpj }: CreateClientInput): Promise<number> {
     const output = await prisma.client.create({
       data: {
         businessName,
@@ -12,23 +17,13 @@ export class PrismaClientRepository implements ClientRepository {
       },
       select: {
         id: true,
-        businessName: true,
-        cnpj: true,
       },
     })
 
-    return {
-      id: output.id,
-      businessName: output.businessName,
-      cnpj: output.cnpj,
-    }
+    return output.id
   }
 
-  async update({
-    id,
-    businessName,
-    cnpj,
-  }: ClientWithId): Promise<ClientWithId> {
+  async update({ id, businessName, cnpj }: UpdateClientInput): Promise<number> {
     const output = await prisma.client.update({
       where: {
         id,
@@ -39,12 +34,10 @@ export class PrismaClientRepository implements ClientRepository {
       },
       select: {
         id: true,
-        businessName: true,
-        cnpj: true,
       },
     })
 
-    return output
+    return output.id
   }
 
   async delete(id: number): Promise<void> {
@@ -60,32 +53,59 @@ export class PrismaClientRepository implements ClientRepository {
 
   async findById(id: number): Promise<Client> {
     const output = await prisma.$queryRaw<Client[]>`
-      SELECT id, 
+      select id, 
              "businessName",
              cnpj
-        FROM client C 
-       WHERE C.id = ${id}`
+        from isys_client C 
+       where C.id = ${id}
+         and C.deleted_at is null`
 
     return output[0]
   }
 
   async findByCNPJ(cnpj: string): Promise<Client> {
     const output = await prisma.$queryRaw<Client[]>`
-      SELECT id, 
+      select id, 
              "businessName",
              cnpj
-        FROM client C 
-       WHERE C.cnpj = ${cnpj}`
+        from isys_client C 
+       where C.cnpj = ${cnpj}
+         and C.deleted_at is null`
 
     return output[0]
   }
 
+  async list({ page, limit }: ListClientSchema): Promise<ListClientDTO> {
+    const offset = (page - 1) * limit
+
+    const count = await prisma.client.count({
+      where: {
+        deleted_at: null,
+      },
+    })
+
+    const output = await prisma.$queryRaw<Client[]>`
+      select C.id,
+             C."businessName" as "businessName",
+             C.cnpj as cnpj
+        from isys_client C
+       where C.deleted_at is null
+       limit ${limit}
+      offset ${offset}`
+
+    return {
+      count,
+      data: output,
+    }
+  }
+
   async listForDropdown(): Promise<Client[]> {
     const output = await prisma.$queryRaw<Client[]>`
-      SELECT id as value, 
+      select id as value, 
              "businessName" as label
-        FROM client C
-       ORDER BY "businessName" DESC
+        from isys_client C
+       where C.deleted_at is null
+       order by "businessName" desc
       `
 
     return output

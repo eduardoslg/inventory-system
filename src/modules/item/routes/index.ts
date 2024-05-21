@@ -9,6 +9,7 @@ export const itemRoutes = Router()
 itemRoutes.use(ensureAuthenticated)
 
 itemRoutes.post('/', ItemController.create)
+itemRoutes.put('/:id', ItemController.update)
 itemRoutes.get('/list', ItemController.list)
 itemRoutes.get('/list/dropdown', ItemController.listForDropdown)
 itemRoutes.delete('/:id', ItemController.delete)

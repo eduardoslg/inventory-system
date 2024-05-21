@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "debug": "tsx watch --inspect src/server.ts",
-    "start": "node dist/server.js",
+    "start": "ts-node-dev --respawn -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules src/server.ts",
+    "start1": "node dist/server.js",
     "build": "tsup src --out-dir dist",
     "test:e2e": "yarn test"
   },
